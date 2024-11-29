@@ -1,6 +1,8 @@
 <?php
 require 'database.php';
 
+require 'database.php';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = htmlspecialchars($_POST['name'], ENT_QUOTES, 'UTF-8');
     $email = htmlspecialchars($_POST['email'], ENT_QUOTES, 'UTF-8');
@@ -12,7 +14,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->bindParam(':email', $email);
         $stmt->bindParam(':password', $password);
         $stmt->execute();
-        header('Location: login.php');
+
+        $userId = $db->lastInsertId();
+        echo "<script>
+            var userId = {$userId};
+            var userName = '{$name}';
+            var userEmail = '{$email}';
+            var userPassword = '{$password}';
+            localStorage.setItem('id_do_usuario', userId);
+            localStorage.setItem('nome_do_usuario', userName);
+            localStorage.setItem('email_do_usuario', userEmail);
+            localStorage.setItem('senha_do_usuario', userPassword);
+            alert('Usuário registrado com sucesso!');
+            window.location.href = 'login.php';
+        </script>";
     } catch (PDOException $e) {
         echo 'Erro: ' . $e->getMessage();
     }

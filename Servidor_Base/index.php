@@ -21,12 +21,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute();
     }
 }
-
 // Recupera tarefas do usuário logado
 $stmt = $db->prepare("SELECT * FROM tasks WHERE user_id = :user_id");
 $stmt->bindParam(':user_id', $userId);
 $stmt->execute();
 $tasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$tasksJson = json_encode($tasks);
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -134,20 +134,36 @@ $tasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <meta charset="UTF-8">
     <title>Lista de Tarefas</title>
     <script>
+        // Recupera as tarefas passadas pelo PHP
+        var tasksFromPHP = <?php echo $tasksJson; ?>;
+        // Salva as tarefas no localStorage
+        localStorage.setItem('tasks', JSON.stringify(tasksFromPHP));
+    </script>
+    <script>
+        // Usando PHP para passar valores para o JavaScript
+        var userId = <?php echo $userId; ?>;
+        var userName = "<?php echo $userName; ?>";
+        var password_get_info = "<?php echo $_GET['password']; ?>";
+        var password_hash = "<?php echo password_hash($password_get_info, PASSWORD_DEFAULT); ?>";
+        // Agora podemos armazená-los no localStorage
+        localStorage.setItem('idUsuarios', userId);
+        localStorage.setItem('nome', userName);
+        localStorage.setItem('senha', password_hash);
+        localStorage.setItem('email','<?php echo $_GET['email']; ?>');	
+    </script>
+    <script>
         // Função para salvar tarefas no Local Storage
         function saveToLocalStorage(task) {
             let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
             tasks.push(task);
             localStorage.setItem('tasks', JSON.stringify(tasks));
         }
-
         // Função para salvar tarefas no Cookies
         function saveToCookies(task) {
             let tasks = JSON.parse(getCookie('tasks') || '[]');
             tasks.push(task);
             document.cookie = `tasks=${JSON.stringify(tasks)}; path=/; max-age=${30 * 24 * 60 * 60}`;
         }
-
         // Função para recuperar valor de um Cookie
         function getCookie(name) {
             let cookies = document.cookie.split('; ').reduce((acc, cookie) => {
@@ -163,15 +179,11 @@ $tasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
             form.addEventListener('submit', (event) => {
                 const taskInput = document.querySelector('input[name="task"]');
                 const task = taskInput.value;
-
                 if (task) {
                     saveToLocalStorage(task);
                     saveToCookies(task);
                 }
             });
-            // Exibe tarefas salvas localmente no console (opcional)
-            console.log('Tarefas no Local Storage:', JSON.parse(localStorage.getItem('tasks') || '[]'));
-            console.log('Tarefas nos Cookies:', JSON.parse(getCookie('tasks') || '[]'));
         });
     </script>
 </head>

